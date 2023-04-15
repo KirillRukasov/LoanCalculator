@@ -34,7 +34,7 @@ public class LoanCalculatorServiceTest
         var request = new MonthlyPaymentRequest
         {
             LoanAmount = 10000,
-            LoanIssueDate = _today.AddDays(-1), // дата выдачи кредита в прошлом
+            LoanIssueDate = _today.AddDays(-1), 
             LoanClosureDate = _today.AddYears(1),
             InterestRate = 0.1m,
             PaymentType = PaymentType.Annuity,
@@ -58,7 +58,7 @@ public class LoanCalculatorServiceTest
             LoanClosureDate = _today.AddYears(1),
             InterestRate = 0.1m,
             PaymentType = PaymentType.Annuity,
-            PaymentDay = _today.Day + 1 //день платежа не совпадает с днем закрытия
+            PaymentDay = _today.Day + 1 
         };
 
         var calculator = new LoanCalculatorService();
