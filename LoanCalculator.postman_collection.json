@@ -1,0 +1,34 @@
+{
+	"info": {
+		"_postman_id": "06edeef7-8ed2-48d5-b5a0-0df9b07c7fb9",
+		"name": "LoanCalculator",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "24912379"
+	},
+	"item": [
+		{
+			"name": "AnnuityPaymentType",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		},
+		{
+			"name": "DifferentiatedPaymentType",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		},
+		{
+			"name": "ValidateRequest",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		}
+	]
+}
