@@ -1,60 +1,46 @@
+using LoanCalculator.Models;
 using LoanCalculator.Models.Requests;
 using LoanCalculator.Models.Responses;
+using LoanCalculator.Services.Calculators.Helpers;
 using LoanCalculator.Services.Interfaces;
 
 namespace LoanCalculator.Services.Calculators;
 
 public class DifferentialLoanCalculator : ILoanCalculator
 {
-    private decimal _multiplierPayment = 1.05m;
+    private readonly NumbersOfPaymentsCalculator _paymentsCalculator;
+
+    public DifferentialLoanCalculator()
+    {
+        _paymentsCalculator = new NumbersOfPaymentsCalculator();
+    }
     public List<MonthlyPaymentResponse> CalculatePayments(MonthlyPaymentRequest request)
     {
-        decimal dailyInterestRate = request.InterestRate / 365 / 100;
-        decimal remainingPrincipal = request.LoanAmount;
+        var calculationParameters = GetCalculationParameters(request);
         
         List<MonthlyPaymentResponse> paymentSchedule = new List<MonthlyPaymentResponse>();
-        
-        DateTime currentDate = request.LoanIssueDate;
-        DateTime nextPaymentDate = currentDate.GetNextPaymentDate(request.PaymentDay);
-        
-        double numberOfPayments = Math.Round((request.LoanClosureDate.Year - request.LoanIssueDate.Year) * 12 
-                                             + request.LoanClosureDate.Month - request.LoanIssueDate.Month 
-                                             + (double)(request.LoanClosureDate.Day - request.LoanIssueDate.Day) 
-                                             / DateTime.DaysInMonth(request.LoanIssueDate.Year, request.LoanIssueDate.Month), 2);
 
-        decimal monthlyPayment = Math.Round(request.LoanAmount / (decimal)numberOfPayments, 2);
-
-        double paymentCount = 0;
-        while (paymentCount < numberOfPayments)
-        {
-            double monthBetweenPayments = Math.Round(Math.Ceiling((nextPaymentDate-currentDate).TotalDays) / DateTime.DaysInMonth(currentDate.Year, currentDate.Month), 2);
-            paymentCount += monthBetweenPayments;
-            decimal interestPayment = remainingPrincipal * dailyInterestRate * (nextPaymentDate - currentDate).Days;
-            decimal principalPayment = monthlyPayment;
-
-            if (paymentCount < 2)
-            {
-                principalPayment = monthlyPayment * (decimal)paymentCount;
-            }
-            
-            if (principalPayment * _multiplierPayment > remainingPrincipal)
-            {
-                principalPayment = remainingPrincipal;
-            }
-            remainingPrincipal -= principalPayment;
-
-            paymentSchedule.Add(new MonthlyPaymentResponse
-            {
-                PaymentDate = nextPaymentDate,
-                PrincipalPayment = Math.Round(principalPayment, 2),
-                InterestPayment = Math.Round(interestPayment, 2),
-                RemainingPrincipal = Math.Round(remainingPrincipal, 2)
-            });
-
-            currentDate = nextPaymentDate;
-            nextPaymentDate = nextPaymentDate.GetNextPaymentDate(request.PaymentDay);
-        }
+        PaymentScheduleCalculator calculator = new PaymentScheduleCalculator(request);
+        calculator.AddingPaymentToSchedule(request, calculationParameters, paymentSchedule);
 
         return paymentSchedule;
+    }
+
+    private CalculationParameters GetCalculationParameters(MonthlyPaymentRequest request)
+    {
+        double numbersOfPayments = _paymentsCalculator.GetNumberOfPayments(request);
+        decimal monthlyPayment =
+            Math.Round(request.LoanAmount / (decimal)numbersOfPayments, 2);
+        var calculationParameters = new CalculationParameters
+        {
+            DailyInterestRate = request.InterestRate / 365 / 100,
+            RemainPrincipal = request.LoanAmount,
+            CurrentDate = request.LoanIssueDate,
+            NextPaymentDate = request.LoanIssueDate.GetNextPaymentDate(request.PaymentDay),
+            NumbersOfPayments = numbersOfPayments,
+            MonthlyPayment = monthlyPayment
+        };
+
+        return calculationParameters;
     }
 }   

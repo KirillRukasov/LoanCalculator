@@ -18,6 +18,10 @@ public class LoanCalculatorService : ILoanCalculatorService
         {
             throw new ArgumentException("День закрытия кредита должен совпадать с выбранным днем платежа");
         }
+        if (request.LoanClosureDate == request.LoanIssueDate)
+        {
+            throw new ArgumentException("День закрытия кредита не может совпадать с днем открытия");
+        }
 
         ILoanCalculator loanCalculator = GetLoanCalculator(request.PaymentType);
         return loanCalculator.CalculatePayments(request);

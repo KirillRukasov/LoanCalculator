@@ -1,4 +1,4 @@
-namespace LoanCalculator.Services.Calculators;
+namespace LoanCalculator.Services.Calculators.Helpers;
 
 public static class NextPaymentCalculator
 {
